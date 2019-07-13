@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const joi = require('@hapi/joi');
 
 const schema = {
   username: {
     type: String,
     required: [true, 'User username is required'],
-    unique: true
+    unique: true,
+    minlength: 4
   },
   email: {
     type: String,
@@ -43,10 +45,25 @@ UserSchema.methods.toJSON = function() {
   return {
     email: userObj.email,
     id: userObj._id,
-    username: userObj.username
+    username: userObj.username,
+    isAdmin: userObj.isAdmin
   }
 }
 
 const User = mongoose.model('User', UserSchema);
 
-module.exports = User;
+function validateUser(data) {
+  const schema = joi.object().keys({
+    username: joi.string().alphanum().min(4).max(30).required(),
+    password: joi.string().required(),
+    email: joi.string().email().required(),
+    isAdmin: joi.boolean().valid(true)
+  });
+
+  return joi.validate(data, schema)
+}
+
+module.exports = {
+  User,
+  validateUser
+};
