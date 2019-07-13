@@ -7,6 +7,10 @@ const app = express();
 
 app.use(bodyParser.json());
 
+const UserRouter = require("./api/routes/users");
+
+app.use("/users", UserRouter);
+
 app.get('/', (req, res) => {
   res.send("league-api");
 });
