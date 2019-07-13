@@ -11,6 +11,15 @@ app.get('/', (req, res) => {
   res.send("league-api");
 });
 
+app.use((req, res, next) => {
+  res.status(404).send();
+})
+
+app.use((err, req, res, next) => {
+  console.log(err.stack);
+  res.status(500).send("Something went wrong");
+})
+
 mongoose.connect(
   process.env.DB_CONNECTION_STRING, 
   { useNewUrlParser: true }, 
