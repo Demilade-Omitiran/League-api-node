@@ -71,6 +71,12 @@ const UsersController = {
   async logout(req, res) {
     await User.findByIdAndUpdate(req.user._id, {valid_jwt: null});
     res.status(200).json({message: "Logged out successfully"});
+  },
+
+  async getLoggedInUser(req, res) {
+    message = "User retrieved successfully";
+    data = req.user.toJSON();
+    res.status(200).json({ message, data });
   }
 };
 
