@@ -42,6 +42,14 @@ const authentication = (req, res, next) => {
   }
 }
 
+const adminAuthorization = async (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return res.status(401).json({error: "Only Admins can perform this action"});
+  }
+  next();
+}
+
 module.exports = {
-  authentication
+  authentication,
+  adminAuthorization
 };
