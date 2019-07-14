@@ -1,5 +1,4 @@
-const User = require('../models/User').User;
-const validateUser = require('../models/User').validateUser;
+const { User, validateUser } = require('../models/User');
 const pick = require('lodash.pick');
 
 const UsersController = {
