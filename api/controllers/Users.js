@@ -30,6 +30,9 @@ const UsersController = {
       let user = new User(pick(req.body, ['username', 'email', 'password', 'isAdmin']));
       const savedUser = await user.save();
       const token = savedUser.generateAuthToken();
+
+      await User.findByIdAndUpdate(user._id, {valid_jwt: token});
+
       res.status(201).json(
         {
           message: "User created successfully",
@@ -61,11 +64,14 @@ const UsersController = {
     const message = "Login successful";
     const data = user.toJSON();
 
+    await User.findByIdAndUpdate(user._id, {valid_jwt: token});
+
     res.status(200).json({message, data, token});
   },
 
   async logout(req, res) {
-    res.status(200).send("Logged out");
+    await User.findByIdAndUpdate(req.user._id, {valid_jwt: null});
+    res.status(200).json({message: "Logged out successfully"});
   }
 };
 

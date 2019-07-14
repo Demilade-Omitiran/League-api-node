@@ -28,6 +28,10 @@ const authentication = (req, res, next) => {
         return res.status(401).json({error: "Invalid token"});
       }
 
+      if (token != user.valid_jwt) {
+        return res.status(401).json({error: "Invalid token"});
+      }
+
       req.user = user;
 
       next();

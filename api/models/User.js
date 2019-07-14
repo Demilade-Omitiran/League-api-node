@@ -25,7 +25,8 @@ const schema = {
   isAdmin: {
     type: Boolean,
     default: false
-  }
+  },
+  valid_jwt: String
 };
 
 const UserSchema = mongoose.Schema(schema, {timestamps: true});
