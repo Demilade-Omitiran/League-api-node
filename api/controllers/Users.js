@@ -15,13 +15,13 @@ const UsersController = {
 
       const { email, username } = req.body;
       
-      let foundUser = User.findOne({email});
+      let foundUser = await User.findOne({email});
 
       if (foundUser) {
         return res.status(403).json({error: "This email is already in use"});
       }
 
-      foundUser = User.findOne({username});
+      foundUser = await User.findOne({username});
 
       if (foundUser) {
         return res.status(403).json({error: "This username is already in use"});
@@ -39,6 +39,7 @@ const UsersController = {
       );
     }
     catch(err){
+      console.log(err);
       res.status(400).json({message: err});
     }
   },
