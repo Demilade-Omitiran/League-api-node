@@ -80,7 +80,7 @@ function validateUser(data) {
     username: joi.string().alphanum().min(4).max(30).required(),
     password: joi.string().required(),
     email: joi.string().email().required(),
-    isAdmin: joi.boolean().valid(true)
+    isAdmin: joi.boolean()
   });
 
   return joi.validate(data, schema)
