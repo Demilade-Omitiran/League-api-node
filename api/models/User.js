@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const joi = require('@hapi/joi');
+const jwt = require("jsonwebtoken");
 
 const schema = {
   username: {
@@ -47,6 +48,27 @@ UserSchema.methods.toJSON = function() {
     id: userObj._id,
     username: userObj.username,
     isAdmin: userObj.isAdmin
+  }
+}
+
+UserSchema.methods.generateAuthToken = function() {
+  const token = jwt.sign(
+    {
+      sub: this._id,
+      isAdmin: this.isAdmin
+    },
+    process.env.JWT_SECRET
+  );
+
+  return token;
+}
+
+UserSchema.methods.validPassword = async function(password) {
+  try {
+    return await bcrypt.compare(password, this.password);
+  }
+  catch(err) {
+    throw new Error(err);
   }
 }
 
