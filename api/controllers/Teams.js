@@ -90,12 +90,11 @@ const TeamsController = {
         });
       }
       else {
-        return res.status(404).json({error: "Team not found"});
+        return res.status(404).json({error: "Team doesn't exist"});
       }
     }
     catch (err) {
-      console.log(err);
-      return res.status(400).json({error: err.message});
+      return res.status(404).json({error: "Team doesn't exist"});
     }
   },
 
