@@ -1,4 +1,5 @@
 const { Team, validateTeam } = require('../models/Team');
+const { Fixture } = require('../models/Fixture');
 const redis = require('redis');
 const client = redis.createClient();
 
@@ -104,7 +105,22 @@ const TeamsController = {
       const team = await Team.findById(id);
 
       if (team) {
+        queryObj = { 
+          "$or": [
+            { homeTeam: team },
+            { awayTeam: team }
+          ]
+        }
+
+        const teamHasFixtures = await Fixture.countDocuments(queryObj);
+
+        if (teamHasFixtures) {
+          return res.status(403).json({ error: "Could not delete team; team has fixtures" });
+        }
+
         await Team.deleteOne({ _id: id });
+
+        await UpdateCache();
 
         res.status(200).json({
           message: "Team deleted successfully",
@@ -143,6 +159,8 @@ const TeamsController = {
       }
 
       const team = await Team.findById(id);
+
+      await UpdateCache();
 
       res.status(200).json({
         message: "Team updated successfully",
