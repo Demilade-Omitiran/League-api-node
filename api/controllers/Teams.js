@@ -54,7 +54,7 @@ const TeamsController = {
 
       const results = await Team.find().limit(per_page).skip(offset).sort(sortObj);
 
-      const total = await Team.count();
+      const total = await Team.countDocuments();
       
       const page_count = Math.ceil(total / per_page);
 
@@ -139,6 +139,50 @@ const TeamsController = {
       res.status(200).json({
         message: "Team updated successfully",
         data: team.toJSON()
+      });
+    }
+    catch(err) {
+      console.log(err);
+      return res.status(400).json({error: err.message});
+    }
+  },
+
+  async search(req, res) {
+    try {
+      let page = parseInt(req.query.page);
+      page = (isNaN(page) || page < 1) ? 1 : page;
+
+      let per_page = parseInt(req.query.per_page);
+      per_page = (isNaN(per_page) || per_page < 1) ? 20 : per_page;
+
+      let order_by = ["createdAt", "name"].includes(req.query.order_by) ? req.query.order_by : "createdAt";
+
+      let order = (req.query.order !== undefined) && (["asc", "desc"].includes(req.query.order.toLowerCase())) ? req.query.order.toLowerCase() : "desc";
+
+      const sortObj = {};
+      sortObj[`${order_by}`] = order;
+
+      const offset = (page - 1) * per_page;
+
+      const { query } = req.query;
+
+      const results = await Team.find({name: new RegExp(query, 'i')}).limit(per_page).skip(offset).sort(sortObj);
+
+      const total = await Team.countDocuments({name: new RegExp(query, 'i')});
+      
+      const page_count = Math.ceil(total / per_page);
+
+      res.status(200).json({
+        message: "Teams retrieved successfully",
+        data: results,
+        meta: {
+          total,
+          page,
+          per_page,
+          page_count,
+          order,
+          order_by,
+        }
       });
     }
     catch(err) {
