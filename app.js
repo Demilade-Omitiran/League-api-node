@@ -9,9 +9,11 @@ app.use(bodyParser.json());
 
 const UserRouter = require("./api/routes/users");
 const TeamRouter = require("./api/routes/teams");
+const FixtureRouter = require("./api/routes/fixtures");
 
 app.use("/users", UserRouter);
 app.use("/teams", TeamRouter);
+app.use("/fixtures", FixtureRouter);
 
 app.get('/', (req, res) => {
   res.send("league-api");
