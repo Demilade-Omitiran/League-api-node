@@ -130,6 +130,12 @@ const TeamsController = {
       const { id } = req.params;
       const { name } = req.body;
 
+      const foundTeam = await Team.findOne({ name, _id: { $ne: id } });
+
+      if (foundTeam) {
+        return res.status(403).json({error: "Team name already in use"});
+      }
+
       const update = await Team.update({ _id: id }, { name });
 
       if (update.n == 0){
