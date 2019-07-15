@@ -9,7 +9,7 @@ client.on('error', (err) => {
 });
 
 const UpdateCache = async () => {
-  const results = await Fixture.find().limit(20).sort({ matchDate: "desc" });
+  const results = await Fixture.find().populate('homeTeam').populate('awayTeam').limit(20).sort({ matchDate: "desc" });
   const total = await Fixture.count();
   const page = 1;
   const per_page = 20;
@@ -148,6 +148,8 @@ const FixturesController = {
       if (fixture) {
         await Fixture.deleteOne({ _id: id });
 
+        await UpdateCache();
+
         res.status(200).json({
           message: "Fixture deleted successfully",
           data: fixture.toJSON()
@@ -158,6 +160,7 @@ const FixturesController = {
       }
     }
     catch(err) {
+      console.log(err);
       if (err.name == "CastError"){
         return res.status(404).json({error: "Fixture doesn't exist"});
       }
@@ -172,7 +175,7 @@ const FixturesController = {
       const { id } = req.params;
       const { home_team_goals: homeTeamGoals, away_team_goals: awayTeamGoals, match_date: matchDate } = req.body;
 
-      const fixture = await Fixture.findById(id);
+      let fixture = await Fixture.findById(id);
 
       if (!fixture) {
         return res.status(404).json({error: "Fixture doesn't exist"});
@@ -206,6 +209,10 @@ const FixturesController = {
       }
 
       await fixture.save();
+
+      fixture = await Fixture.findById(fixture.id).populate('homeTeam').populate('awayTeam');
+
+      await UpdateCache();
 
       res.status(200).json({
         message: "Fixture updated successfully",
