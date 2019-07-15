@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -28,5 +28,8 @@
     "mongoose": "^5.6.4",
     "nodemon": "^1.19.1",
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "jest": "^24.8.0"
   }
 }
