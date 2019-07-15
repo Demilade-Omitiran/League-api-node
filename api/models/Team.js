@@ -19,8 +19,8 @@ TeamSchema.methods.toJSON = function() {
   return {
     id: teamObj._id,
     name: teamObj.name,
-    createdAt: teamObj.createdAt,
-    updatedAt: teamObj.updatedAt
+    created_at: teamObj.createdAt,
+    updated_at: teamObj.updatedAt
   }
 }
 

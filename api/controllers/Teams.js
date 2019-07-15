@@ -43,7 +43,8 @@ const TeamsController = {
       let per_page = parseInt(req.query.per_page);
       per_page = (isNaN(per_page) || per_page < 1) ? 20 : per_page;
 
-      let order_by = ["createdAt", "name"].includes(req.query.order_by) ? req.query.order_by : "createdAt";
+      let order_by_param = ["created_at", "name"].includes(req.query.order_by) ? req.query.order_by : "created_at";
+      let order_by = order_by_param == "created_at" ? "createdAt" : order_by_param;
 
       let order = (req.query.order !== undefined) && (["asc", "desc"].includes(req.query.order.toLowerCase())) ? req.query.order.toLowerCase() : "desc";
 
@@ -67,7 +68,7 @@ const TeamsController = {
           per_page,
           page_count,
           order,
-          order_by,
+          order_by: order_by_param,
         }
       });
     }
