@@ -4,7 +4,7 @@
   "description": "This is a test api.",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "nodemon server.js",
     "test": "jest"
   },
   "repository": {
