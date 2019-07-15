@@ -2,9 +2,17 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require("body-parser");
 require('dotenv/config');
+const rateLimit = require("express-rate-limit");
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+});
 
 const app = express();
 
+app.use(limiter);
+app.set('trust proxy', 1);
 app.use(bodyParser.json());
 
 const UserRouter = require("./api/routes/users");
