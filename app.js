@@ -8,8 +8,10 @@ const app = express();
 app.use(bodyParser.json());
 
 const UserRouter = require("./api/routes/users");
+const TeamRouter = require("./api/routes/teams");
 
 app.use("/users", UserRouter);
+app.use("/teams", TeamRouter);
 
 app.get('/', (req, res) => {
   res.send("league-api");
