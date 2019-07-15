@@ -1,5 +1,39 @@
 const { Fixture, validateFixture } = require('../models/Fixture');
 const { Team } = require("../models/Team");
+const redis = require('redis');
+const client = redis.createClient();
+
+// Print redis errors to the console
+client.on('error', (err) => {
+  console.log("Error " + err);
+});
+
+const UpdateCache = async () => {
+  const results = await Fixture.find().limit(20).sort({ matchDate: "desc" });
+  const total = await Fixture.count();
+  const page = 1;
+  const per_page = 20;
+  const page_count = Math.ceil(total / per_page);
+  const order = "desc";
+  const order_by = "match_date";
+
+  responseObj = {
+    message: "Fixtures retrieved successfully",
+    data: results,
+    meta: {
+      total,
+      page,
+      per_page,
+      page_count,
+      order,
+      order_by,
+    }
+  };
+
+  await client.setex("cachedFixtures", 3600, JSON.stringify(responseObj));
+
+  return responseObj;
+}
 
 const FixturesController = {
   async create(req, res) {
@@ -63,6 +97,8 @@ const FixturesController = {
 
       let fixture = new Fixture({ homeTeam, awayTeam, homeTeamGoals, awayTeamGoals, matchDate });
       await fixture.save();
+
+      await UpdateCache();
 
       res.status(201).json(
         {
@@ -239,6 +275,19 @@ const FixturesController = {
           { homeTeam: teams },
           { awayTeam: teams }
         ];
+      }
+
+      if (page == 1 && per_page == 20 && order_by == "matchDate" && order == "desc" && !query){
+        return client.get("cachedFixtures", async (err, results) => {
+          if (results){
+            fixtures = JSON.parse(results)
+          }
+          else {
+            fixtures = await UpdateCache();
+          }
+
+          return res.status(200).json(fixtures);
+        });
       }
 
       const results = await Fixture.

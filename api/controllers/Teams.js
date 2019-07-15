@@ -1,4 +1,38 @@
 const { Team, validateTeam } = require('../models/Team');
+const redis = require('redis');
+const client = redis.createClient();
+
+// Print redis errors to the console
+client.on('error', (err) => {
+  console.log("Error " + err);
+});
+
+const UpdateCache = async () => {
+  const results = await Team.find().limit(20).sort({ createdAt: "desc" });
+  const total = await Team.count();
+  const page = 1;
+  const per_page = 20;
+  const page_count = Math.ceil(total / per_page);
+  const order = "desc";
+  const order_by = "created_at";
+
+  responseObj = {
+    message: "Teams retrieved successfully",
+    data: results,
+    meta: {
+      total,
+      page,
+      per_page,
+      page_count,
+      order,
+      order_by,
+    }
+  };
+
+  await client.setex("cachedTeams", 3600, JSON.stringify(responseObj));
+
+  return responseObj;
+}
 
 const TeamsController = {
   async create(req, res) {
@@ -21,6 +55,8 @@ const TeamsController = {
 
       let team = new Team({ name });
       await team.save();
+
+      await UpdateCache();
 
       res.status(201).json(
         {
@@ -136,13 +172,26 @@ const TeamsController = {
 
       const { query } = req.query;
 
+      if (page == 1 && per_page == 20 && order_by == "createdAt" && order == "desc" && !query){
+        return client.get("cachedTeams", async (err, results) => {
+          if (results){
+            teams = JSON.parse(results)
+          }
+          else {
+            teams = await UpdateCache();
+          }
+
+          return res.status(200).json(teams);
+        });
+      }
+
       const results = await Team.find({name: new RegExp(query, 'i')}).limit(per_page).skip(offset).sort(sortObj);
 
       const total = await Team.countDocuments({name: new RegExp(query, 'i')});
       
       const page_count = Math.ceil(total / per_page);
 
-      res.status(200).json({
+      responseObj = {
         message: "Teams retrieved successfully",
         data: results,
         meta: {
@@ -153,7 +202,9 @@ const TeamsController = {
           order,
           order_by,
         }
-      });
+      };
+
+      res.status(200).json(responseObj);
     }
     catch(err) {
       console.log(err);
