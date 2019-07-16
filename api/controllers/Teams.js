@@ -1,6 +1,7 @@
 const { Team, validateTeam } = require('../models/Team');
 const { Fixture } = require('../models/Fixture');
 const redis = require('redis');
+require('dotenv/config');
 const client = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true});
 
 // Print redis errors to the console
