@@ -32,6 +32,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "jest": "^24.8.0"
+    "jest": "^24.8.0",
+    "node-factory": "^0.2.3"
   }
 }
