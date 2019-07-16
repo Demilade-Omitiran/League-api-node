@@ -1,7 +1,7 @@
 const { Fixture, validateFixture } = require('../models/Fixture');
 const { Team } = require("../models/Team");
 const redis = require('redis');
-const client = redis.createClient();
+const client = redis.createClient(process.env.REDISCLOUD_URL, {no_ready_check: true});
 
 // Print redis errors to the console
 client.on('error', (err) => {
