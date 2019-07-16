@@ -1,13 +1,7 @@
 const { Team, validateTeam } = require('../models/Team');
 const { Fixture } = require('../models/Fixture');
-const redis = require('redis');
 require('dotenv/config');
-const client = redis.createClient(process.env.REDIS_URL);
-
-// Print redis errors to the console
-client.on('error', (err) => {
-  console.log("Error " + err);
-});
+const redis = require('../services/redis');
 
 const UpdateCache = async () => {
   const results = await Team.find().limit(20).sort({ createdAt: "desc" });
@@ -31,7 +25,10 @@ const UpdateCache = async () => {
     }
   };
 
+  client = redis.client();
+
   await client.setex("cachedTeams", 3600, JSON.stringify(responseObj));
+  client.quit();
 
   return responseObj;
 }
@@ -198,6 +195,8 @@ const TeamsController = {
       const { query } = req.query;
 
       if (page == 1 && per_page == 20 && order_by == "createdAt" && order == "desc" && !query){
+        client = redis.client();
+
         return client.get("cachedTeams", async (err, results) => {
           if (results){
             teams = JSON.parse(results)
@@ -206,6 +205,7 @@ const TeamsController = {
             teams = await UpdateCache();
           }
 
+          client.quit();
           return res.status(200).json(teams);
         });
       }

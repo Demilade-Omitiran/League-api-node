@@ -1,13 +1,7 @@
 const { Fixture, validateFixture } = require('../models/Fixture');
 const { Team } = require("../models/Team");
-const redis = require('redis');
 require('dotenv/config');
-const client = redis.createClient(process.env.REDIS_URL);
-
-// Print redis errors to the console
-client.on('error', (err) => {
-  console.log("Error " + err);
-});
+const { client } = require('../services/redis');
 
 const UpdateCache = async () => {
   const results = await Fixture.find().populate('homeTeam').populate('awayTeam').limit(20).sort({ matchDate: "desc" });
@@ -31,7 +25,10 @@ const UpdateCache = async () => {
     }
   };
 
+  client = redis.client();
+
   await client.setex("cachedFixtures", 3600, JSON.stringify(responseObj));
+  client.quit();
 
   return responseObj;
 }
@@ -286,6 +283,8 @@ const FixturesController = {
       }
 
       if (page == 1 && per_page == 20 && order_by == "matchDate" && order == "desc" && !query){
+        client = redis.client();
+        
         return client.get("cachedFixtures", async (err, results) => {
           if (results){
             fixtures = JSON.parse(results)
@@ -294,6 +293,7 @@ const FixturesController = {
             fixtures = await UpdateCache();
           }
 
+          client.quit();
           return res.status(200).json(fixtures);
         });
       }
