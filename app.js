@@ -42,4 +42,8 @@ mongoose.connect(
   () => console.log("Connected to db!")
 );
 
+app.close = async () => {
+  await mongoose.connection.close();
+}
+
 module.exports = app;
